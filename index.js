@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import db from "./config/db.js";
+import authRoute from "./route/auth.js"
 import diaryRoute from "./route/diary.js"
 import commentRoute from "./route/comment.js"
 import methodOverride from "method-override";
@@ -19,6 +20,7 @@ app.use(methodOverride('_method'));
 app.set("view engine", "ejs");
 
 
+app.use("/auth", authRoute);
 app.use("/diaries", diaryRoute);
 app.use("/comments", commentRoute);
 app.use("/", (req, res) => {

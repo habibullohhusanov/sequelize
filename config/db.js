@@ -29,25 +29,38 @@ db.sequelize = sequelize;
 
 // import models
 
+import user from "../models/user.js"
 import diary from "../models/diary.js";
 import comment from "../models/comment.js";
 
 // create models
 
+db.user = user(sequelize, Sequelize);
 db.diary = diary(sequelize, Sequelize);
 db.comment = comment(sequelize, Sequelize);
 
-// reletions
-
-db.diary.hasMany(db.comment, {
-    as: "comment",
+/*    reletions    */
+// has many
+db.user.hasMany(db.diary, {
+    as: "diaries",
     onDelete: "CASCADE",
     constraints: true
+})
+db.diary.hasMany(db.comment, {
+    as: "comments",
+    onDelete: "CASCADE",
+    constraints: true
+});
+// belongs to
+db.diary.belongsTo(db.user, {
+    foregnKey: "userId",
+    as: "user",
 });
 db.comment.belongsTo(db.diary, {
     foregnKey: "diaryId",
     as: "diary",
 });
+// belongsto many
 
 
 export default db;
