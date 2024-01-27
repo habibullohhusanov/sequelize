@@ -6,75 +6,103 @@ const User = db.user;
 
 export const login_view = async (req, res) => {
     try {
-        res.render("diaries/login");
+        return res.render("diaries/login");
     } catch (e) {
-        res.render("error_pages/error", {
+        return res.render("error_pages/error", {
             error: e
         });
     }
 }
 export const login = async (req, res) => {
     try {
-        const loginData = req.body;
+        let loginData = req.body;
         let { error } = loginRequest.validate(loginData);
         if (error) {
-            res.redirect("/auth/login");
-        } else {
-            req.isLogin = true;
-            res.redirect("/diaries");
+            return res.redirect("/auth/login");
         }
+        let { email, password } = req.body;
+        let user = await User.findOne({
+            raw: true,
+            where: { email: email },
+        });
+        if (user && user.email == email) {
+            let passwordMatch = await bcrypt.compare(password, user.password);
+            if (passwordMatch) {
+                req.session.isLogin = true;
+                req.session.user = {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                };
+                req.session.save(err => {
+                    console.log(err);
+                    return res.redirect("/auth/login");
+                })
+                return res.redirect("/diaries");
+            }
+        }
+        return res.redirect("/auth/login");
     } catch (e) {
-        res.render("error_pages/error", {
+        return res.render("error_pages/error", {
             error: e
         });
     }
 }
 export const register_veiw = async (req, res) => {
     try {
-        res.render("diaries/register");
+        return res.render("diaries/register");
     } catch (e) {
-        res.render("error_pages/error", {
+        return res.render("error_pages/error", {
             error: e
         });
     }
 }
 export const register = async (req, res) => {
     try {
-        let { error } = registerRequest.validate(req.body);
+        let registerData = req.body;
+        let { error } = registerRequest.validate(registerData);
         if (error) {
             console.log("Validate error");
-            res.redirect("/auth/register");
+            return res.redirect("/auth/register");
         } else {
-            let { name, email, password, password_confirmation } = req.body
-            let user = User.findOne({
+            let { name, email, password, password_confirmation } = req.body;
+            let user = await User.findOne({
                 where: { email: email },
             });
-            if (user.email == req.body.email) {
-                res.redirect("/auth/register");
-            } else {
-                // let salt = await bcrypt.getSalt("abdefghijklmnopqrstuvxyzg%^!@#$%^&*()123456789/-+,.|`~fsdbbn");
+            if (!user || user.email !== req.body.email) {
                 await bcrypt.hash(password, 10, (err, hash) => {
                     if (err) {
                         console.log(err);
+                        return res.redirect("/auth/register");
                     } else {
-                        console.log("User yaratildi");
                         User.create({
                             name,
                             email,
                             password: hash
                         });
+                        req.session.isLogin = true;
+                        req.session.user = {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                        };
+                        return res.redirect("/diaries");
                     }
                 });
-                res.redirect("/diaries");
+            } else {
+                return res.redirect("/auth/register");
             }
         }
     } catch (e) {
-        res.render("error_pages/error", {
+        console.log("register");
+        return res.render("error_pages/error", {
             error: e
         });
     }
 
 }
 export const logout = async (req, res) => {
-
+    await req.session.destroy(() => {
+        return res.redirect("/");
+    });
 }

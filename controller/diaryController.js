@@ -43,12 +43,11 @@ export const store = async (req, res) => {
 export const view = async (req, res) => {
     try {
         const diary = await Diary.findByPk(req.params.id, {
-            include: ["comment"]
+            include: ["comments"]
         });
-        console.log(diary);
         res.render("diaries/lenta", {
             diary: diary,
-            comments: diary.comment
+            comments: diary.comments
         });
     } catch(e) {
         res.render("error_pages/error", {

@@ -32,12 +32,14 @@ db.sequelize = sequelize;
 import user from "../models/user.js"
 import diary from "../models/diary.js";
 import comment from "../models/comment.js";
+import session from "../models/session.js";
 
 // create models
 
 db.user = user(sequelize, Sequelize);
 db.diary = diary(sequelize, Sequelize);
 db.comment = comment(sequelize, Sequelize);
+db.session = session(sequelize, Sequelize);
 
 /*    reletions    */
 // has many
