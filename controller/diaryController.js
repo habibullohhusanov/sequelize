@@ -28,14 +28,17 @@ export const create = async (req, res) => {
 }
 export const store = async (req, res) => {
     try {
-        const {image, text} = req.body;
-        await Diary.create({
-            imageUrl: image,
-            text: text
-        });
-        res.redirect("/diaries");
+        const {text} = req.body;
+        if (req.file) {
+            await Diary.create({
+                imageUrl: "/images/" + req.file.filename,
+                text: text,
+                userId: req.session.user.id,
+            });
+        }
+        return res.redirect("/diaries");
     } catch(e) {
-        res.render("error_pages/error", {
+        return res.render("error_pages/error", {
             error: e
         });
     }

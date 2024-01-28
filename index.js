@@ -1,7 +1,10 @@
+import path from "path";
 import dotenv from "dotenv";
+import { dirname } from 'path';
 import db from "./config/db.js";
+import flash from "connect-flash";
+import { fileURLToPath } from 'url';
 import pool from "./config/pgPool.js";
-import flash from "connect-flash"
 import session from "express-session";
 import authRoute from "./route/auth.js";
 import pgSession from "connect-pg-simple";
@@ -16,6 +19,9 @@ import express from "express";
 const URL = process.env.URL;
 const PORT = process.env.PORT;
 const store = pgSession(session);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 
 const app = express();
 // start
@@ -43,6 +49,7 @@ app.use((req, res, next) => {
     }
     next();
 });
+app.use(express.static(path.join(__dirname, "public")));
 app.use("/auth", authRoute);
 app.use("/diaries", diaryRoute);
 app.use("/comments", commentRoute);
