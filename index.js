@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import db from "./config/db.js";
 import pool from "./config/pgPool.js";
+import flash from "connect-flash"
 import session from "express-session";
 import authRoute from "./route/auth.js";
 import pgSession from "connect-pg-simple";
@@ -19,7 +20,7 @@ const store = pgSession(session);
 const app = express();
 // start
 
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.set("view engine", "ejs");
 app.use(session({
@@ -30,10 +31,18 @@ app.use(session({
         pool: pool,
         tableName: "sessions"
     }),
-    cookie: { maxAge: 15 * 24 * 60 * 60 * 1000 }
+    cookie: { maxAge: 10 * 24 * 60 * 60 * 1000 }
 }));
-
-
+app.use(flash());
+app.use((req, res, next) => {
+    // auth
+    if (req.session.isLogin) {
+        res.locals.isLogin = req.session.isLogin;
+    } else {
+        res.locals.isLogin = false;
+    }
+    next();
+});
 app.use("/auth", authRoute);
 app.use("/diaries", diaryRoute);
 app.use("/comments", commentRoute);
@@ -49,7 +58,7 @@ const start = async () => {
     try {
         await db.sequelize.sync({ alter: true });
         app.listen(PORT, () => console.log(`${URL}:${PORT}`))
-    } catch(e) {
+    } catch (e) {
         console.log(e);
     }
 }
