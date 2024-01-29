@@ -1,5 +1,6 @@
 import path from "path";
 import dotenv from "dotenv";
+import express from "express";
 import { dirname } from 'path';
 import db from "./config/db.js";
 import flash from "connect-flash";
@@ -13,8 +14,6 @@ import methodOverride from "method-override";
 import commentRoute from "./route/comment.js";
 
 dotenv.config();
-
-import express from "express";
 
 const URL = process.env.URL;
 const PORT = process.env.PORT;
